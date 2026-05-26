@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Amihan AI Contact Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        h2 {
+            color: #444;
+            margin-top: 30px;
+        }
+
+        input {
+            padding: 10px;
+            margin: 5px;
+            width: calc(100% - 24px);
+            max-width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        button {
+            padding: 10px 16px;
+            margin: 5px;
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #005ea6;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            padding: 10px;
+            background: #eef2f5;
+            margin: 5px 0;
+            border-radius: 8px;
+        }
+
+        #suggestion {
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            margin-top: 10px;
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌤️ Amihan AI Contact Assistant</h1>
+
+        <div class="section">
+            <h2>Add Contact</h2>
+            <input id="name" placeholder="Name">
+            <input id="phone" placeholder="Phone">
+            <br>
+            <button onclick="addContact()">Add Contact</button>
+        </div>
+
+        <div class="section">
+            <h2>Contacts</h2>
+            <button onclick="loadContacts()">Load Contacts</button>
+            <ul id="contacts"></ul>
+        </div>
+
+        <div class="section">
+            <h2>Suggest Message</h2>
+            <input id="suggestName" placeholder="Contact name">
+            <input id="style" placeholder="Style: friendly, warm, professional">
+            <input id="intent" placeholder="Intent: checkin, followup, casual">
+            <br>
+            <button onclick="suggestMessage()">Generate Suggestion</button>
+
+            <p id="suggestion"></p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Search Contacts</h2>
+        <input id="searchName" placeholder="Enter contact name">
+        <button onclick="searchContacts()">Search</button>
+
+        <ul id="searchResults"></ul>
+    </div>
+
+    <div class="section">
+        <h2>📊 Dashboard</h2>
+        <button onclick="loadAnalytics()">Load Analytics</button>
+
+        <p id="totalContacts"></p>
+        <p id="totalMessages"></p>
+        <p id="avgMessages"></p>
+    </div>
+
+    <script>
+        
+        
+
+        const API_URL = "http://127.0.0.1:8000";
+
+        async function addContact() {
+            const name = document.getElementById("name").value;
+            const phone = document.getElementById("phone").value;
+
+            const response = await fetch(`${API_URL}/contacts`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({name, phone})
+            });
+
+            const data = await response.json();
+            alert(data.message);
+        }
+
+        async function loadContacts() {
+            const response = await fetch(`${API_URL}/contacts`);
+            const contacts = await response.json();
+
+            const list = document.getElementById("contacts");
+            list.innerHTML = "";
+
+            contacts.forEach(contact => {
+                const item = document.createElement("li");
+
+                item.innerHTML = `
+                    <strong>${contact.name}</strong> - ${contact.phone}
+                    <br>
+                    <button onclick="deleteContact('${contact.name}')">Delete</button>
+                    <button onclick="updateContact('${contact.name}')">Update</button>
+                `;
+
+                list.appendChild(item);
+            });
+        }
+
+        async function suggestMessage() {
+            const name = document.getElementById("suggestName").value;
+            const style = document.getElementById("style").value || "friendly";
+            const intent = document.getElementById("intent").value || "checkin";
+
+            const response = await fetch(`${API_URL}/suggest-message`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({name, style, intent})
+            });
+
+            const data = await response.json();
+            document.getElementById("suggestion").textContent = data.message;
+        }
+
+        async function deleteContact(name) {
+            const response = await fetch(`${API_URL}/contacts/${name}`, {
+                method: "DELETE"
+            });
+
+            const data = await response.json();
+            alert(data.message);
+
+            loadContacts();
+        }
+
+        async function updateContact(oldName) {
+            const newName = prompt("Enter new name:");
+            const newPhone = prompt("Enter new phone:");
+
+            if (!newName || !newPhone) return;
+
+            const response = await fetch(`${API_URL}/contacts/${oldName}`, {
+                method: "PUT",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    name: newName,
+                    phone: newPhone
+                })
+            });
+
+            const data = await response.json();
+            alert(data.message);
+
+            loadContacts();
+        }
+
+        async function searchContacts() {
+            const name = document.getElementById("searchName").value;
+
+            const response = await fetch(`${API_URL}/contacts`);
+            const contacts = await response.json();
+
+            const filtered = contacts.filter(contact =>
+                contact.name.toLowerCase().includes(name.toLowerCase())
+            );
+
+            const results = document.getElementById("searchResults");
+            results.innerHTML = "";
+
+            filtered.forEach(contact => {
+                const item = document.createElement("li");
+                item.textContent = `${contact.name} - ${contact.phone}`;
+                results.appendChild(item);
+            });
+
+            if (filtered.length === 0) {
+                results.innerHTML = "<li>No contacts found</li>";
+            }
+        }
+
+        async function loadAnalytics() {
+            const response = await fetch(`${API_URL}/analytics`);
+            const data = await response.json();
+
+            document.getElementById("totalContacts").textContent =
+                "Total Contacts: " + data.total_contacts_tracked;
+
+            document.getElementById("totalMessages").textContent =
+                "Total Messages: " + data.total_messages_generated;
+
+            document.getElementById("avgMessages").textContent =
+                "Average per Contact: " + data.average_messages_per_contact.toFixed(2);
+        }
+
+    </script>
+</body>
+</html>
