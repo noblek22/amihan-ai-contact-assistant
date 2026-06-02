@@ -198,11 +198,15 @@ def search_contacts(
     ORDER BY {sort_by}
     """
     
-    """, (
-        username,
-        f"%{search_term}%",
-        f"%{search_term}%"
-    ))
+    cursor.execute(
+        query,
+        (
+        
+            username,
+            f"%{search_term}%",
+            f"%{search_term}%"
+        )
+    )    
 
     results = cursor.fetchall()
 
