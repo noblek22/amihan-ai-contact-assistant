@@ -623,16 +623,22 @@ def get_all_users_route(token: str):
 
 @app.get("/postgres-test")
 def postgres_test():
-    user = get_user_postgres("testuser")
+    try:
+        user = get_user_postgres("testuser")
 
-    if not user:
-        create_user_postgres(
-            "testuser",
-            "password",
-            "user"
-        )
+        if not user:
+            create_user_postgres(
+                "testuser",
+                "password",
+                "user"
+            )
 
-    return {
-        "message": "PostgreSQL connection working",
-        "user": "testuser"
-    }
+        return {
+            "message": "PostgreSQL connection working",
+            "user": "testuser"
+        }
+
+    except Exception as e:
+        return {
+            "error": str(e)
+        }
