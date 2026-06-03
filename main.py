@@ -42,7 +42,9 @@ app = FastAPI(
 )
 
 initialize_database()
-initialize_postgres_database()
+
+if os.getenv("DATABASE_URL"):
+    initialize_postgres_database()
 
 # --------------------------------------------------
 # SESSION SETTINGS
