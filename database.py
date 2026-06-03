@@ -14,7 +14,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 def get_connection():
     return sqlite3.connect(DB_NAME)
 
-def get_pstgres_connection():
+def get_postgres_connection():
 
     return psycopg2.connect(
         DATABASE_URL
