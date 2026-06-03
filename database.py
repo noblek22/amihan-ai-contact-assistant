@@ -15,10 +15,10 @@ def get_connection():
     return sqlite3.connect(DB_NAME)
 
 def get_postgres_connection():
-
-    return psycopg2.connect(
-        DATABASE_URL
-    )
+    if not DATABASE_URL:
+        raise ValueError("DATABASE_URL environment variable is not set")
+    
+    return psycopg2.connect(DATABASE_URL)
 
 def initialize_database():
     conn = get_connection()
