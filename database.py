@@ -1,15 +1,24 @@
 import sqlite3
 import os
+import psycopg2
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
-DB_NAME = os.getenv("DB_NAME")
+DB_NAME = os.getenv("DB_NAME", "ammihan.db")
+
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 
 def get_connection():
     return sqlite3.connect(DB_NAME)
 
+def get_pstgres_connection():
+
+    return psycopg2.connect(
+        DATABASE_URL
+    )
 
 def initialize_database():
     conn = get_connection()
