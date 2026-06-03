@@ -623,4 +623,12 @@ def get_all_users_route(token: str):
 
 @app.get("/postgres-test")
 def postgres_test():
-    return {"message": "Postgre test route loaded"}   
+    create_user_postgres(
+        "testuser",
+        "password",
+        "user"
+    )
+
+    return {
+        "message": "PostgreSQL insert successful"
+    }
