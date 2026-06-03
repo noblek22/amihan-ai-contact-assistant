@@ -261,3 +261,64 @@ def get_top_contacts(username, limit=5):
     conn.close()
 
     return contacts
+
+def initialize_postgres_database():
+
+    conn = get_postgres_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username TEXT UNIQUE,
+        password_hash TEXT,
+        role TEXT
+    )
+    """)
+
+    conn.commit()
+    conn.close()
+
+def create_user_postgres(
+    username,
+    password_hash,
+    role
+):
+    conn = get_postgres_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    INSERT INTO users (
+        username,
+        password_hash,
+        role
+    )
+    VALUES (%s, %s, %s)
+    """, (
+        username,
+        password_hash,
+        role
+    ))
+
+    conn.commit()
+    conn.close()
+
+def get_user_postgres(username):
+
+    conn = get_postgres_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT
+        username,
+        password_hash,
+        role
+    FROM users
+    WHERE username = %s
+    """, (username,))
+
+    user = cursor.fetchone()
+
+    conn.close()
+
+    return user

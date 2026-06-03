@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 from database import (
     initialize_database,
+    initialize_postgres_database,
     create_user,
     get_user,
     get_all_users,
@@ -20,7 +21,9 @@ from database import (
     delete_contact,
     search_contacts,
     get_contact_statistics,
-    get_top_contacts
+    get_top_contacts,
+    create_user_postgres,
+    get_user_postgres
 )
 
 load_dotenv()
@@ -39,6 +42,7 @@ app = FastAPI(
 )
 
 initialize_database()
+initialize_postgres_database()
 
 # --------------------------------------------------
 # SESSION SETTINGS
@@ -614,3 +618,16 @@ def get_all_users_route(token: str):
         }
         for u in users
     ]
+
+@app.get("/postgres-test")
+def postgres_test():
+
+    create_user_postgres(
+        "testuser",
+        "password",
+        "user"
+    )
+
+    return {
+        "message": "PostgreSQL insert successful"
+    }   

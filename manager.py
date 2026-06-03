@@ -73,3 +73,5 @@ class ContactManager:
 
     def save_contacts(self):
         save_contacts(self.contacts)
+
+
