@@ -642,3 +642,10 @@ def postgres_test():
         return {
             "error": str(e)
         }
+
+@app.get("/env-check")
+def env_check():
+    return {
+        "database_url_exists": bool(os.getenv("DATABASE_URL")),
+        "db_name": os.getenv("DB_NAME")
+    }
